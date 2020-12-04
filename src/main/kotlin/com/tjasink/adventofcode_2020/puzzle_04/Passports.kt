@@ -70,22 +70,18 @@ class Passports {
 
     fun isValidField(name: String, value: String): Boolean {
         return when (name) {
-            "byr" -> // (Birth Year) - four digits; at least 1920 and at most 2002.
-            {
+            "byr" -> { // (Birth Year) - four digits; at least 1920 and at most 2002.
                 value.matches(Regex("[0-9]{4}")) && value.toInt() in 1920..2002
             }
-            "iyr" -> // (Issue Year) - four digits; at least 2010 and at most 2020.
-            {
+            "iyr" -> { // (Issue Year) - four digits; at least 2010 and at most 2020.
                 value.matches(Regex("[0-9]{4}")) && value.toInt() in 2010..2020
             }
-            "eyr" -> // (Expiration Year) - four digits; at least 2020 and at most 2030.
-            {
+            "eyr" -> { // (Expiration Year) - four digits; at least 2020 and at most 2030.
                 value.matches(Regex("[0-9]{4}")) && value.toInt() in 2020..2030
             }
-            "hgt" -> // (Height) - a number followed by either cm or in:
+            "hgt" -> { // (Height) - a number followed by either cm or in:
                         //If cm, the number must be at least 150 and at most 193.
                         //If in, the number must be at least 59 and at most 76.
-            {
                 val heightRegEx = Regex("(\\d+)(in|cm)")
                 val match = heightRegEx.find(value)
                 if (match == null) {
@@ -103,16 +99,13 @@ class Passports {
                     }
                 }
             }
-            "hcl" -> // (Hair Color) - a # followed by exactly six characters 0-9 or a-f.
-            {
+            "hcl" -> { // (Hair Color) - a # followed by exactly six characters 0-9 or a-f.
                 value.matches(Regex("#[0-9a-f]{6}"))
             }
-            "ecl" -> // (Eye Color) - exactly one of: amb blu brn gry grn hzl oth.
-            {
+            "ecl" -> { // (Eye Color) - exactly one of: amb blu brn gry grn hzl oth.
                 setOf("amb", "blu", "brn", "gry", "grn", "hzl", "oth").contains(value)
             }
-            "pid" -> // (Passport ID) - a nine-digit number, including leading zeroes.
-            {
+            "pid" -> { // (Passport ID) - a nine-digit number, including leading zeroes.
                 value.matches(Regex("[0-9]{9}"))
             }
             else -> false
