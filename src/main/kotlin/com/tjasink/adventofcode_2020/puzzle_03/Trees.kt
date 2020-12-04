@@ -26,9 +26,7 @@ class Trees {
 
     fun countAndMultiplyTrees(mapStart: List<String>, allSlopes: List<Pair<Int, Int>>): Long {
         val numTreesAllSlopes = allSlopes.map { countTrees(mapStart, it.first, it.second).toLong() }
-        val product = numTreesAllSlopes.reduce { acc, i ->  acc * i }
-        println(product)
-        return product
+        return numTreesAllSlopes.reduce { acc, i ->  acc * i }
     }
 
     fun countTrees(mapStart: List<String>, slopeX: Int, slopeY: Int): Int {
@@ -41,8 +39,6 @@ class Trees {
                 return numTrees
             }
             val x = turn * slopeX
-//            println(map[y])
-//            println("$turn: $y/$x")
             if (map[y][x] == '#') numTrees += 1
         }
 
