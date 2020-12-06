@@ -16,7 +16,7 @@ fun main() {
 class Boarding {
 
     fun emptySeatNumber(data: List<String>): Int {
-        val sortedSeats = data.map { seatNumber(it) }.map { it.id }.sorted()
+        val sortedSeats = data.map { seatId(it) }.sorted()
         sortedSeats.forEachIndexed { index, id ->
             if (index + 89 != id) {
                 return index + 89
@@ -26,23 +26,14 @@ class Boarding {
     }
 
     fun highestSeatNumber(data: List<String>): Int {
-        return data.map { seatNumber(it) }.maxByOrNull { it.id }!!.id
+        return data.map { seatId(it) }.maxOrNull()!!
     }
 
-    fun seatNumber(data: String): BoardingPass {
-        val rowData = data.substring(0, 7)
-        val columnData = data.substring(7)
-
-        val row = rowData.replace('F', '0').replace('B', '1').toInt(2)
-        val column = columnData.replace('L', '0').replace('R', '1').toInt(2)
-
-        return BoardingPass(row, column)
-    }
+    fun seatId(data: String) = data
+        .replace('F', '0')
+        .replace('B', '1')
+        .replace('L', '0')
+        .replace('R', '1')
+        .toInt(2)
 
 }
-
-data class BoardingPass(
-    val row: Int,
-    val column: Int,
-    val id: Int = row * 8 + column
-)

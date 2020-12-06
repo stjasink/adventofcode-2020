@@ -6,27 +6,26 @@ fun main() {
         .lineSequence()
         .toList()
 
-    val sumForAnyone = Customs().collateAndCountAndAddGrouupAnswersForAnyonesAnswers(input)
+    val sumForAnyone = Customs().collateAndCountAndAddGroupAnswersForAnyonesAnswers(input)
     println("Total group answers where anyone answered: $sumForAnyone")
 
-    val sumForEveryone = Customs().collateAndCountAndAddGrouupAnswersForEveryonesAnswers(input)
+    val sumForEveryone = Customs().collateAndCountAndAddGroupAnswersForEveryonesAnswers(input)
     println("Total group answers where everyone answered: $sumForEveryone")
 }
 
 class Customs {
 
-    fun collateAndCountAndAddGrouupAnswersForAnyonesAnswers(data: List<String>): Long {
-        return collateGrouupAnswers(data)
-            .map { it.fold(mutableSetOf<Char>()) { acc, set -> acc.union(set).toMutableSet() } }
-            .map { it.size }
-            .fold(0L) { acc, i -> acc + i }
-    }
+    fun collateAndCountAndAddGroupAnswersForAnyonesAnswers(data: List<String>) =
+        collateAndProcess(data, Set<Char>::union)
 
-    fun collateAndCountAndAddGrouupAnswersForEveryonesAnswers(data: List<String>): Long {
+    fun collateAndCountAndAddGroupAnswersForEveryonesAnswers(data: List<String>) =
+        collateAndProcess(data, Set<Char>::intersect)
+
+    fun collateAndProcess(data: List<String>, operation: Set<Char>.(Set<Char>) -> Set<Char>): Long {
         return collateGrouupAnswers(data)
-            .map { it.fold(it.first()) { acc, set -> acc.intersect(set).toMutableSet() } }
-            .map { it.size }
-            .fold(0L) { acc, i -> acc + i }
+            .map { it.reduce { acc, set -> acc.operation(set) } }
+            .map { it.size.toLong() }
+            .reduce { acc, i -> acc + i }
     }
 
     fun collateGrouupAnswers(data: List<String>): List<List<Set<Char>>> {

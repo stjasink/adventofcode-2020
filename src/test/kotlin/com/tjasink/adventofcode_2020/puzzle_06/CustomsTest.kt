@@ -25,7 +25,7 @@ class CustomsTest {
             b
         """.trimIndent().split('\n')
 
-        val actual = Customs().collateAndCountAndAddGrouupAnswersForAnyonesAnswers(input)
+        val actual = Customs().collateAndCountAndAddGroupAnswersForAnyonesAnswers(input)
         assertEquals(11L, actual)
     }
 
@@ -49,7 +49,7 @@ class CustomsTest {
             b
         """.trimIndent().split('\n')
 
-        val actual = Customs().collateAndCountAndAddGrouupAnswersForEveryonesAnswers(input)
+        val actual = Customs().collateAndCountAndAddGroupAnswersForEveryonesAnswers(input)
         assertEquals(6L, actual)
     }
 }
