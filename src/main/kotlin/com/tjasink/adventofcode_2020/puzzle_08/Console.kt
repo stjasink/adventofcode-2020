@@ -8,21 +8,28 @@ fun main() {
         .lineSequence()
         .toList()
 
-    val start1 = Date()
-    val accumulatorAtLoopStart = Console().findAccumulatorAtLoopOrCompletion(input)
-    println("Time: ${Date().time - start1.time}")
-    println("Accumulator at loop start: ${accumulatorAtLoopStart.first}")
+    for (i in 1..5) {
+        val start1 = Date()
+        val accumulatorAtLoopStart = Console().findAccumulatorAtLoopOrCompletionFromStrings(input)
+        println("Time: ${Date().time - start1.time}")
+        println("Accumulator at loop start: ${accumulatorAtLoopStart.first}")
 
-    val start2 = Date()
-    val accumulatorAtSuccess = Console().findAccumulatorAtSuccessfulCompletion(input)
-    println("Time: ${Date().time - start2.time}")
-    println("Accumulator at succesful completion: $accumulatorAtSuccess")
+        val start2 = Date()
+        val accumulatorAtSuccess = Console().findAccumulatorAtSuccessfulCompletion(input)
+        println("Time: ${Date().time - start2.time}")
+        println("Accumulator at successful completion: $accumulatorAtSuccess")
+
+    }
 
 }
 
 class Console {
 
-    fun findAccumulatorAtLoopOrCompletion(code: List<String>): Pair<Int, CompletionType> {
+    fun findAccumulatorAtLoopOrCompletionFromStrings(code: List<String>): Pair<Int, CompletionType> {
+        return findAccumulatorAtLoopOrCompletion(code.map { decodeLine(it) })
+    }
+
+    fun findAccumulatorAtLoopOrCompletion(code: List<Instruction>): Pair<Int, CompletionType> {
         var acc = 0
         var pointer = 0
         val pointersAlreadyUsed = mutableSetOf<Int>()
@@ -34,36 +41,36 @@ class Console {
                 return Pair(acc, CompletionType.SUCCESS)
             }
             pointersAlreadyUsed.add(pointer)
-            val (ins, num) = decodeLine(code[pointer])
-            when (ins) {
-                "nop" -> {
+            val (opcode, num) = code[pointer]
+            when (opcode) {
+                OpCode.nop -> {
                     pointer += 1
                 }
-                "acc" -> {
+                OpCode.acc -> {
                     acc += num
                     pointer += 1
                 }
-                "jmp" -> {
+                OpCode.jmp -> {
                     pointer += num
                 }
             }
         }
     }
 
-    fun findAccumulatorAtSuccessfulCompletion(code: List<String>): Int {
+    fun findAccumulatorAtSuccessfulCompletion(codeStrings: List<String>): Int {
+        val code = codeStrings.map { decodeLine(it) }
         for (changeLine in code.indices) {
-            val newCode = mutableListOf<String>()
-            newCode.addAll(code)
-            val (ins, num) = decodeLine(code[changeLine])
-            when (ins) {
-                "nop" -> {
-                    newCode[changeLine] = "jmp $num"
+            val newCode = mutableListOf<Instruction>().also { it.addAll(code) }
+            val (opcode, num) = code[changeLine]
+            when (opcode) {
+                OpCode.nop -> {
+                    newCode[changeLine] = Instruction(OpCode.jmp, num)
                 }
-                "jmp" -> {
-                    newCode[changeLine] = "nop $num"
+                OpCode.jmp -> {
+                    newCode[changeLine] = Instruction(OpCode.nop, num)
                 }
-                "acc" -> {
-                    // do nothing
+                OpCode.acc -> {
+                    continue
                 }
             }
             val result = findAccumulatorAtLoopOrCompletion(newCode)
@@ -74,10 +81,21 @@ class Console {
         return 0
     }
 
-    private fun decodeLine(line: String): Pair<String, Int> {
+    private fun decodeLine(line: String): Instruction {
         val split = line.split(' ')
-        return Pair(split[0], split[1].toInt())
+        return Instruction(OpCode.valueOf(split[0]), split[1].toInt())
     }
+
+    enum class OpCode {
+        nop,
+        acc,
+        jmp
+    }
+
+    data class Instruction(
+        val opcode: OpCode,
+        val num: Int
+    )
 
     enum class CompletionType {
         LOOP,
