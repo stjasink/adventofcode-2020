@@ -18,7 +18,6 @@ fun main() {
         val accumulatorAtSuccess = Console().findAccumulatorAtSuccessfulCompletion(input)
         println("Time: ${Date().time - start2.time}")
         println("Accumulator at successful completion: $accumulatorAtSuccess")
-
     }
 
 }
@@ -57,9 +56,42 @@ class Console {
         }
     }
 
+    private fun pointersUsed(code: List<Instruction>): Set<Int> {
+        var acc = 0
+        var pointer = 0
+        val pointersAlreadyUsed = mutableSetOf<Int>()
+
+        while (true) {
+            if (pointersAlreadyUsed.contains(pointer)) {
+                return pointersAlreadyUsed
+            } else if (pointer == code.size) {
+                return pointersAlreadyUsed
+            }
+            pointersAlreadyUsed.add(pointer)
+            val (opcode, num) = code[pointer]
+            when (opcode) {
+                OpCode.nop -> {
+                    pointer += 1
+                }
+                OpCode.acc -> {
+                    acc += num
+                    pointer += 1
+                }
+                OpCode.jmp -> {
+                    pointer += num
+                }
+            }
+        }
+    }
+
     fun findAccumulatorAtSuccessfulCompletion(codeStrings: List<String>): Int {
+        var changesTried = 0
         val code = codeStrings.map { decodeLine(it) }
+        val pointersUsedInFirstRun = pointersUsed(code)
         for (changeLine in code.indices) {
+            if (!pointersUsedInFirstRun.contains(changeLine)) {
+                continue
+            }
             val newCode = mutableListOf<Instruction>().also { it.addAll(code) }
             val (opcode, num) = code[changeLine]
             when (opcode) {
@@ -73,8 +105,10 @@ class Console {
                     continue
                 }
             }
+            changesTried += 1
             val result = findAccumulatorAtLoopOrCompletion(newCode)
             if (result.second == CompletionType.SUCCESS) {
+                println("Changes tried: $changesTried")
                 return result.first
             }
         }

@@ -19,7 +19,7 @@ class ConsoleTest {
 
     @Test
     fun `output accumulator when executing same instruction again`() {
-        val answer = Console().findAccumulatorAtLoopOrCompletion(code)
+        val answer = Console().findAccumulatorAtLoopOrCompletionFromStrings(code)
 
         assertEquals(Pair(5, Console.CompletionType.LOOP), answer)
     }
