@@ -11,12 +11,12 @@ fun main() {
     for (i in 1..5) {
         val start1 = Date()
         val part1Answer = Decoder().part1(input.map { it.toLong() }, 25)
-        println("Time: ${Date().time - start1.time}")
+        println("Part 1 time: ${Date().time - start1.time}")
         println("Part 1 answer: ${part1Answer}")
 
         val start2 = Date()
         val part2Answer = Decoder().part2(input.map { it.toLong() }, part1Answer)
-        println("Time: ${Date().time - start2.time}")
+        println("Part 2 time: ${Date().time - start2.time}")
         println("Part 2 answer: $part2Answer")
     }
 
@@ -28,12 +28,14 @@ class Decoder {
     fun part2(numbers: List<Long>, lookFor: Long): Long {
         for (startIndex in numbers.indices) {
             val numbersToAdd = mutableListOf<Long>()
+            var currentTotal = 0L
             var i = 0
-            while (numbersToAdd.sum() < lookFor) {
+            while (currentTotal < lookFor) {
                 numbersToAdd.add(numbers[startIndex + i])
+                currentTotal += numbers[startIndex + i]
                 i += 1
             }
-            if (numbersToAdd.sum() == lookFor) {
+            if (currentTotal == lookFor) {
                 val min = numbersToAdd.minOrNull()!!
                 val max = numbersToAdd.maxOrNull()!!
                 return min + max
