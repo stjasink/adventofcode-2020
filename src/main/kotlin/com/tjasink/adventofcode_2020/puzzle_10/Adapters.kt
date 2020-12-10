@@ -1,7 +1,6 @@
 package com.tjasink.adventofcode_2020.puzzle_10
 
 import java.lang.IllegalStateException
-import java.time.Instant
 import java.time.LocalDateTime
 import java.time.Duration
 
@@ -40,35 +39,26 @@ class Adapters {
 
     fun part2(adapters: List<Int>): Long {
         val sortedAdapters = sortAndAddStartAndEnd(adapters)
-        val gapSizes = findGapSizes(sortedAdapters)
-        val runsOfOneJoltGaps = findRunsOfOneJoltGaps(gapSizes)
-        val combinationsForEachRunOfOneJoltGaps = runsOfOneJoltGaps.map {
+        val sizesOfRunsOfOneJoltGaps = findSizesOfRunsOfOneJoltGaps(sortedAdapters)
+        val numCombinationsForEachRunOfOneJoltGaps = sizesOfRunsOfOneJoltGaps.map {
             combinationsForOneJoltGaps(it)
         }
-        return combinationsForEachRunOfOneJoltGaps.reduce { acc, i -> acc * i }
+        return numCombinationsForEachRunOfOneJoltGaps.reduce { acc, i -> acc * i }
     }
 
-    private fun sortAndAddStartAndEnd(adapters: List<Int>): MutableList<Int> {
+    private fun sortAndAddStartAndEnd(adapters: List<Int>): List<Int> {
         val sortedAdapters = adapters.sorted().toMutableList()
         sortedAdapters.add(0, 0)
         sortedAdapters.add(sortedAdapters.last() + 3)
         return sortedAdapters
     }
 
-    private fun findGapSizes(sortedAdapters: MutableList<Int>): MutableList<Int> {
-        val gapSizes = mutableListOf<Int>()
-        for (i in sortedAdapters.indices) {
-            val diff = sortedAdapters[i] - (if (i == 0) 0 else sortedAdapters[i - 1])
-            gapSizes.add(diff)
-        }
-        return gapSizes
-    }
-
-    private fun findRunsOfOneJoltGaps(gapSizes: MutableList<Int>): MutableList<Int> {
+    private fun findSizesOfRunsOfOneJoltGaps(sortedAdapters: List<Int>): List<Int> {
         val runsOfOneJoltGaps = mutableListOf<Int>()
         var numOnes = 0
-        for (i in gapSizes) {
-            if (i == 1) {
+        for (i in sortedAdapters.indices) {
+            val gapSize = sortedAdapters[i] - (if (i == 0) 0 else sortedAdapters[i - 1])
+            if (gapSize == 1) {
                 numOnes += 1
             } else {
                 if (numOnes > 0) {
