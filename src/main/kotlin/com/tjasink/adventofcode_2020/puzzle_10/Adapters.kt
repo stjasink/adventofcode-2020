@@ -1,7 +1,9 @@
 package com.tjasink.adventofcode_2020.puzzle_10
 
 import java.lang.IllegalStateException
-import java.util.*
+import java.time.Instant
+import java.time.LocalDateTime
+import java.time.Duration
 
 fun main() {
     val input = ClassLoader.getSystemResourceAsStream("puzzle_10/adapters.txt")
@@ -10,17 +12,16 @@ fun main() {
         .toList()
 
     for (i in 1..5) {
-        val start1 = Date()
+        val start1 = LocalDateTime.now()
         val part1Answer = Adapters().part1(input.map { it.toInt() })
-        println("Part 1 time: ${Date().time - start1.time}")
-        println("Part 1 answer: ${part1Answer}")
+        println("Part 1 time: ${Duration.between(start1, LocalDateTime.now()).toNanos()/1000}μs")
+        println("Part 1 answer: $part1Answer")
 
-        val start2 = Date()
+        val start2 = LocalDateTime.now()
         val part2Answer = Adapters().part2(input.map { it.toInt() })
-        println("Part 2 time: ${Date().time - start2.time}")
+        println("Part 2 time: ${Duration.between(start2, LocalDateTime.now()).toNanos()/1000}μs")
         println("Part 2 answer: $part2Answer")
     }
-
 
 }
 
@@ -78,7 +79,7 @@ class Adapters {
         }
         return runsOfOneJoltGaps
     }
-    
+
     private fun combinationsForOneJoltGaps(it: Int) = when (it) {
         4 -> 7L
         3 -> 4L
