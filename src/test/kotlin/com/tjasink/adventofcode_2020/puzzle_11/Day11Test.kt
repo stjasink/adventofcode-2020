@@ -25,24 +25,6 @@ class Day11Test {
     }
 
     @Test
-    fun asdf() {
-        val data = """
-            #.##.##.##
-            #######.##
-            #.#.#..#..
-            ####.##.##
-            #.##.##.##
-            #.#####.##
-            ..#.#.....
-            ##########
-            #.######.#
-            #.#####.##
-        """.trimIndent().split('\n')
-        val plan = Day11.SeatingPlan(data)
-        plan.nextRoundPart2Rules()
-    }
-
-    @Test
     fun part2Test() {
         val answer = Day11().part2(input)
         Assertions.assertEquals(26, answer)

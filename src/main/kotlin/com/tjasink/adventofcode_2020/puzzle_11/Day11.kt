@@ -13,12 +13,12 @@ fun main() {
     for (i in 1..5) {
         val start1 = LocalDateTime.now()
         val part1Answer = Day11().part1(input.map { it })
-        println("Part 1 time: ${Duration.between(start1, LocalDateTime.now()).toMillis()}μs")
+        println("Part 1 time: ${Duration.between(start1, LocalDateTime.now()).toMillis()}ms")
         println("Part 1 answer: $part1Answer")
 
         val start2 = LocalDateTime.now()
         val part2Answer = Day11().part2(input.map { it })
-        println("Part 2 time: ${Duration.between(start2, LocalDateTime.now()).toMillis()}μs")
+        println("Part 2 time: ${Duration.between(start2, LocalDateTime.now()).toMillis()}ms")
         println("Part 2 answer: $part2Answer")
     }
 
@@ -29,26 +29,32 @@ class Day11 {
     fun part1(input: List<String>): Int {
         var plan = SeatingPlan(input)
 //        plan.print()
+        var counter = 1
         while (true) {
             val newPlan = plan.nextRoundPart1Rules()
 //            newPlan.print()
             if (newPlan.data == plan.data) {
+                println(counter)
                 return newPlan.countAllOccupied()
             }
             plan = newPlan
+            counter += 1
         }
     }
 
     fun part2(input: List<String>): Int {
         var plan = SeatingPlan(input)
 //        plan.print()
+        var counter = 1
         while (true) {
             val newPlan = plan.nextRoundPart2Rules()
 //            newPlan.print()
             if (newPlan.data == plan.data) {
+                println(counter)
                 return newPlan.countAllOccupied()
             }
             plan = newPlan
+            counter += 1
         }
     }
 
@@ -63,52 +69,32 @@ class Day11 {
         val Floor = '.'
 
         fun nextRoundPart1Rules(): SeatingPlan {
-            val newPlan = mutableListOf<String>()
-            for (y in 0 until width) {
-                val newRow = StringBuilder()
-                for (x in 0 until height) {
-                    val newState = when (data[y][x]) {
-                        EmptySeat -> {
-                            if (countAdjacentOccupied(x, y) == 0) {
-                                OccupiedSeat
-                            } else {
-                                EmptySeat
-                            }
-                        }
-                        OccupiedSeat -> {
-                            if (countAdjacentOccupied(x, y) >= 4) {
-                                EmptySeat
-                            } else {
-                                OccupiedSeat
-                            }
-                        }
-                        Floor -> {
-                            Floor
-                        }
-                        else -> throw IllegalStateException("WAT")
-                    }
-                    newRow.append(newState)
-                }
-                newPlan.add(newRow.toString())
-            }
-            return SeatingPlan(newPlan)
+            return nextRound(
+                emptySeatFlipRule = { x,y -> countAdjacentOccupied(x, y) == 0 },
+                occupiedSeatFlipRule = { x,y -> countAdjacentOccupied(x, y) >= 4 })
         }
 
         fun nextRoundPart2Rules(): SeatingPlan {
+            return nextRound(
+                emptySeatFlipRule = { x,y -> countVisibleOccupied(x, y) == 0 },
+                occupiedSeatFlipRule = { x,y -> countVisibleOccupied(x, y) >= 5 })
+        }
+
+        private fun nextRound(emptySeatFlipRule: (Int, Int) -> Boolean, occupiedSeatFlipRule: (Int, Int) -> Boolean): SeatingPlan {
             val newPlan = mutableListOf<String>()
             for (y in 0 until width) {
                 val newRow = StringBuilder()
                 for (x in 0 until height) {
                     val newState = when (data[y][x]) {
                         EmptySeat -> {
-                            if (countVisibleOccupied(x, y) == 0) {
+                            if (emptySeatFlipRule(x, y)) {
                                 OccupiedSeat
                             } else {
                                 EmptySeat
                             }
                         }
                         OccupiedSeat -> {
-                            if (countVisibleOccupied(x, y) >= 5) {
+                            if (occupiedSeatFlipRule(x, y)) {
                                 EmptySeat
                             } else {
                                 OccupiedSeat
@@ -174,7 +160,6 @@ class Day11 {
                     }
                 }
             }
-
             if (yPos > 0) {
                 for (y in yPos - 1 downTo 0) {
                     if (data[y][xPos] == OccupiedSeat) {
