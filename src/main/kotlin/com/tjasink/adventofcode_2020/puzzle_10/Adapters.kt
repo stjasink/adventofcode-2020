@@ -39,11 +39,11 @@ class Adapters {
 
     fun part2(adapters: List<Int>): Long {
         val sortedAdapters = sortAndAddStartAndEnd(adapters)
-        val sizesOfRunsOfOneJoltGaps = findSizesOfRunsOfOneJoltGaps(sortedAdapters)
-        val numCombinationsForEachRunOfOneJoltGaps = sizesOfRunsOfOneJoltGaps.map {
-            combinationsForOneJoltGaps(it)
+        val sizesOfSequencesOfOneJoltGaps = findSizesOfSequencesOfOneJoltGaps(sortedAdapters)
+        val numCombinationsForEachSequenceOfOneJoltGaps = sizesOfSequencesOfOneJoltGaps.map {
+            findNumCombinationsForOneJoltGap(it)
         }
-        return numCombinationsForEachRunOfOneJoltGaps.reduce { acc, i -> acc * i }
+        return numCombinationsForEachSequenceOfOneJoltGaps.reduce { acc, i -> acc * i }
     }
 
     private fun sortAndAddStartAndEnd(adapters: List<Int>): List<Int> {
@@ -53,7 +53,7 @@ class Adapters {
         return sortedAdapters
     }
 
-    private fun findSizesOfRunsOfOneJoltGaps(sortedAdapters: List<Int>): List<Int> {
+    private fun findSizesOfSequencesOfOneJoltGaps(sortedAdapters: List<Int>): List<Int> {
         val runsOfOneJoltGaps = mutableListOf<Int>()
         var numOnes = 0
         for (i in sortedAdapters.indices) {
@@ -70,7 +70,7 @@ class Adapters {
         return runsOfOneJoltGaps
     }
 
-    private fun combinationsForOneJoltGaps(it: Int) = when (it) {
+    private fun findNumCombinationsForOneJoltGap(it: Int) = when (it) {
         4 -> 7L
         3 -> 4L
         2 -> 2L
