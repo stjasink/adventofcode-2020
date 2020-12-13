@@ -58,8 +58,8 @@ class Day12: Solver {
                         x += wpX * num
                         y += wpY * num
                     }
-                    'L' -> rotateLeft(wpX, wpY, num).apply { wpX = this.first; wpY = this.second }
                     'R' -> rotateRight(wpX, wpY, num).apply { wpX = this.first; wpY = this.second }
+                    'L' -> rotateRight(wpX, wpY, 360 - num).apply { wpX = this.first; wpY = this.second }
                     else -> throw IllegalStateException("WAT $letter$num")
                 }
             }
@@ -72,15 +72,6 @@ class Day12: Solver {
             180 -> Pair(-x, -y)
             90 -> Pair(y, -x)
             270 -> Pair(-y, x)
-            else -> throw IllegalStateException("WAT $degrees")
-        }
-    }
-
-    private fun rotateLeft(x: Int, y: Int, degrees: Int): Pair<Int, Int> {
-        return when (degrees) {
-            180 -> Pair(-x, -y)
-            270 -> Pair(y, -x)
-            90 -> Pair(-y, x)
             else -> throw IllegalStateException("WAT $degrees")
         }
     }
