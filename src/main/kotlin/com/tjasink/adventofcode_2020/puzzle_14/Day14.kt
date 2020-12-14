@@ -13,6 +13,14 @@ fun main() {
 class Day14 : Solver {
 
     override fun part1(input: List<String>): Long {
+        return processLines(input, this::part1MemoryAssignment)
+    }
+
+    override fun part2(input: List<String>): Long {
+        return processLines(input, this::part2MemoryAssignment)
+    }
+
+    private fun processLines(input: List<String>, doAssignments: (String, MutableMap<Long, Long>, Long, Long) -> Unit): Long {
         var currentMask = ""
         val memory = mutableMapOf<Long, Long>()
 
@@ -27,37 +35,31 @@ class Day14 : Solver {
                 val found = memRegex.find(it)!!
                 val memAddress = found.destructured.component1().toLong()
                 val value = found.destructured.component2().toLong()
-                val maskedValue = applyPart1Mask(currentMask, value)
-                memory[memAddress] = maskedValue
+                doAssignments(currentMask, memory, memAddress, value)
             }
         }
 
         return memory.values.sum()
     }
 
-    override fun part2(input: List<String>): Long {
-        var currentMask = ""
-        val memory = mutableMapOf<Long, Long>()
+    private fun part1MemoryAssignment(
+        currentMask: String,
+        memory: MutableMap<Long, Long>,
+        memAddress: Long,
+        value: Long
+    ) {
+        val maskedValue = applyPart1Mask(currentMask, value)
+        memory[memAddress] = maskedValue
+    }
 
-        val maskRegex = Regex("mask = ([X01]{36})")
-        val memRegex = Regex("mem\\[([0-9]+)] = ([0-9]+)")
-
-        input.forEach {
-            if (maskRegex.matches(it)) {
-                val found = maskRegex.find(it)!!
-                currentMask = found.destructured.component1()
-            } else {
-                val found = memRegex.find(it)!!
-                val memAddress = found.destructured.component1().toLong()
-                val value = found.destructured.component2().toLong()
-                val maskedAddresses = applyPart2Mask(currentMask, memAddress)
-                maskedAddresses.forEach {
-                    memory[it] = value
-                }
-            }
-        }
-
-        return memory.values.sum()
+    private fun part2MemoryAssignment(
+        currentMask: String,
+        memory: MutableMap<Long, Long>,
+        memAddress: Long,
+        value: Long
+    ) {
+        val maskedAddresses = applyPart2Mask(currentMask, memAddress)
+        maskedAddresses.forEach { address -> memory[address] = value }
     }
 
     private fun applyPart1Mask(currentMask: String, value: Long): Long {
@@ -83,15 +85,10 @@ class Day14 : Solver {
                     maskedValues.addAll(newMaskedValues)
                     maskedValues.forEachIndexed { maskIndex, mask -> mask.append(if (maskIndex < newMaskedValues.size) '0' else '1') }
                 }
-                '0' -> {
-                    maskedValues.forEach { it.append(binaryValue[index]) }
-                }
-                '1' -> {
-                    maskedValues.forEach { it.append('1') }
-                }
+                '0' -> maskedValues.forEach { it.append(binaryValue[index]) }
+                '1' -> maskedValues.forEach { it.append('1') }
                 else -> throw IllegalStateException("Found ${currentMask[index]} in mask")
             }
-
         }
         return maskedValues.map { it.toString().toLong(2) }
     }
