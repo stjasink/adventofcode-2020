@@ -85,7 +85,8 @@ class Day13 : Solver {
             .mapIndexed { index, busId -> Pair(index, busId) }
             .filter { it.second != null }
             .map { it.first to it.second!! }
-        
+
+        return 0
     }
 
     private fun firstArrivalAfter(time: Int, busId: Int): Int {
