@@ -24,17 +24,12 @@ class Day14 : Solver {
         var currentMask = ""
         val memory = mutableMapOf<Long, Long>()
 
-        val maskRegex = Regex("mask = ([X01]{36})")
-        val memRegex = Regex("mem\\[([0-9]+)] = ([0-9]+)")
-
         input.forEach {
-            if (maskRegex.matches(it)) {
-                val found = maskRegex.find(it)!!
-                currentMask = found.destructured.component1()
+            if (it.startsWith("mask")) {
+                currentMask = it.substringAfter("mask = ")
             } else {
-                val found = memRegex.find(it)!!
-                val memAddress = found.destructured.component1().toLong()
-                val value = found.destructured.component2().toLong()
+                val memAddress = it.substringAfter('[').substringBefore(']').toLong()
+                val value = it.substringAfter(" = ").toLong()
                 doAssignments(currentMask, memory, memAddress, value)
             }
         }
