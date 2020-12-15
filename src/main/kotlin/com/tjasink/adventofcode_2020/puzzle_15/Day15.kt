@@ -23,30 +23,22 @@ class Day15 : Solver {
     }
 
     private fun playGame(withStartNumbers: List<Int>, untilTurn: Int): Int {
-        val lastSeenAt = mutableMapOf<Int, Int>()
-        for (i in 0 until withStartNumbers.size - 1) {
-            lastSeenAt[withStartNumbers[i]] = i
-        }
-        var turnNumber = withStartNumbers.size
+        val lastSeenAt = withStartNumbers
+            .dropLast(1)
+            .mapIndexed { index, i -> i to index }
+            .toMap()
+            .toMutableMap()
+
+        val start = withStartNumbers.size
+
         var newNumber = withStartNumbers.last()
-
-        while (true) {
-            if (turnNumber == untilTurn) {
-                return newNumber
-            }
-
+        for (turnNumber in start until untilTurn) {
             val foundAt = lastSeenAt[newNumber]
             lastSeenAt[newNumber] = turnNumber - 1
-
-            if (foundAt == null) {
-                newNumber = 0
-            } else {
-                val age = turnNumber - foundAt - 1
-                newNumber = age
-            }
-
-            turnNumber += 1
+            newNumber = if (foundAt == null) 0 else turnNumber - foundAt - 1
         }
+
+        return newNumber
     }
 
 }
