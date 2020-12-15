@@ -82,42 +82,25 @@ class Day13 : Solver {
     fun part2v3(input: List<String>): Long {
         val busIds = input[1].split(',').map { if (it == "x") null else it.toLong() }
         val mustBeDivisibleBy = busIds
-            .mapIndexed { index, busId -> Pair(index.toLong(), busId) }
+            // map to (phase, period)
+            .mapIndexed { index, busId -> Pair(-index.toLong(), busId) }
             .filter { it.second != null }
             .map { it.first to it.second!! }
-
-//        val alignments = mutableListOf<Long>()
-//        for (i in 1 until mustBeDivisibleBy.size) {
-//            val alignment = bus_alignment(mustBeDivisibleBy[0].second, mustBeDivisibleBy[i].second, mustBeDivisibleBy[i].first)
-//            alignments.add(alignment)
-//            println("Buses ${mustBeDivisibleBy[0].second} and ${mustBeDivisibleBy[i].second} offset ${mustBeDivisibleBy[i].first} align at $alignment")
-//        }
-
-//        return mustBeDivisibleBy.reduce { acc, bus ->
-//            val (bus1Phase, bus1Period) = acc
-//            val (bus2Phase, bus2Period) = bus
-//            val newPhase = bus_alignment(bus1Period, bus2Period, bus2Phase - bus1Phase)
-//            val newPeriod = lcm(acc.second, bus.second)
-//            println("Composite bus $newPeriod offset $newPhase")
-//            Pair(newPhase, newPeriod)
-//        }.second
-
-        val mustBeDivisible2 = listOf(mustBeDivisibleBy[0], mustBeDivisibleBy[2], mustBeDivisibleBy[1], mustBeDivisibleBy[3], mustBeDivisibleBy[4])
 
         return mustBeDivisibleBy.reduce { acc, bus ->
             val (bus1Phase, bus1Period) = acc
             val (bus2Phase, bus2Period) = bus
             val (combinedPeriod, combinedPhase) = combine_phased_rotations(bus1Period, bus1Phase, bus2Period, bus2Phase)
-            val rationalisedCombinedPhase =
-                (-combinedPhase % combinedPeriod).let { if (it < 0) it + combinedPeriod else it }
-            println("Buses $bus1Period/$bus1Phase and $bus2Period/$bus2Phase align at $combinedPeriod/$rationalisedCombinedPhase")
-            Pair(rationalisedCombinedPhase, combinedPeriod)
-        }.first
+            println("Buses $bus1Period/$bus1Phase and $bus2Period/$bus2Phase align at $combinedPeriod/$combinedPhase (${(combinedPhase + combinedPeriod) % combinedPeriod})")
+            Pair(combinedPhase, combinedPeriod)
+        }.let {
+            (it.first + it.second) % it.second
+        }
     }
 
     fun bus_alignment(red_len: Long, green_len: Long, advantage: Long): Long {
         val (period, phase) = combine_phased_rotations(
-            red_len, 0, green_len, (advantage % green_len).let { if (it < 0) it + green_len else it }
+            red_len, 0, green_len, (-advantage % green_len).let { if (it < 0) it + green_len else it }
         )
         return (-phase % period).let { if (it < 0) it + period else it }
     }

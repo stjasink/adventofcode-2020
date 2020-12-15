@@ -22,6 +22,27 @@ class Day13Test {
         Assertions.assertEquals(1068781, answer)
     }
 
+//    @Test
+//    fun part2SplitTest() {
+//        val inputs = listOf(
+//            "7,13,x,x,x,x,x,x" to 77L,
+//            "7,x,x,x,59,x,x,x" to 350L,
+//            "7,x,x,x,x,x,31,x" to 0L,
+//            "7,x,x,x,x,x,x,19" to 0L,
+//            "x,13,x,x,59,x,x,x" to 0L,
+//            "x,13,x,x,x,x,31,x" to 0L,
+//            "x,13,x,x,x,x,x,19" to 0L,
+//            "7,13,x,x,59,x,x,x" to 0L,
+//        )
+//
+//        inputs.forEach {
+//            val input = listOf("ignored") + it.first
+//            val answer = Day13().part2(input)
+//            println(it.first + ": $answer")
+////            Assertions.assertEquals(it.second, answer)
+//        }
+//    }
+
     @Test
     fun part2TestDifferentExamples() {
         val inputs = listOf(
@@ -38,12 +59,6 @@ class Day13Test {
             Assertions.assertEquals(it.second, answer)
         }
 
-    }
-
-    @Test
-    fun part2Gcd() {
-        Assertions.assertEquals(18L, Day13().bus_alignment(9, 15, 3))
-        Assertions.assertEquals(120L, Day13().bus_alignment(30, 38, 6))
     }
 
 }
