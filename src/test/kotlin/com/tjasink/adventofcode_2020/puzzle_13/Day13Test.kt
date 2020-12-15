@@ -39,4 +39,11 @@ class Day13Test {
         }
 
     }
+
+    @Test
+    fun part2Gcd() {
+        Assertions.assertEquals(18L, Day13().bus_alignment(9, 15, 3))
+        Assertions.assertEquals(120L, Day13().bus_alignment(30, 38, 6))
+    }
+
 }
