@@ -35,15 +35,22 @@ class Day16 : Solver {
             }.isEmpty()
         }
 
+        val validTicketValues = mutableListOf<List<Int>>()
+        for (fieldNum in validTickets.first().indices) {
+            validTicketValues.add(validTickets.map { it[fieldNum] })
+        }
+
         val fieldsInOrder = Array<Field?>(fields.size) { null }.toMutableList()
-        while (fieldsInOrder.contains(null)) {
+        val fieldsToMatch = fields.toMutableList()
+        while (fieldsToMatch.isNotEmpty()) {
             for (ticketFieldNum in myTicket.indices) {
-                val ticketFieldValues = validTickets.map { it[ticketFieldNum] }
-                val matchingFields = fields.filter { field ->
+                val ticketFieldValues = validTicketValues[ticketFieldNum]
+                val matchingFields = fieldsToMatch.filter { field ->
                     !fieldsInOrder.contains(field) && field.validRanges.containsAll(ticketFieldValues)
                 }
                 if (matchingFields.size == 1) {
                     fieldsInOrder[ticketFieldNum] = matchingFields.first()
+                    fieldsToMatch.remove(matchingFields.first())
                 }
             }
         }
