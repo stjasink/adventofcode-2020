@@ -27,19 +27,19 @@ class Day13 : Solver {
     override fun part2(input: List<String>): Long {
         val busIds = input[1].split(',').map { if (it == "x") null else it.toLong() }
         val mustBeDivisibleBy = busIds
-            // map to (phase, period)
-            .mapIndexed { index, busId -> Pair(index.toLong(), busId) }
-            .filter { it.second != null }
-            .map { it.first to it.second!! }
+            // map to (period, phase)
+            .mapIndexed { index, busId -> Pair(busId, index.toLong()) }
+            .filter { it.first != null }
+            .map { it.first!! to it.second }
 
         return mustBeDivisibleBy.reduce { acc, bus ->
-            val (bus1Phase, bus1Period) = acc
-            val (bus2Phase, bus2Period) = bus
+            val (bus1Period, bus1Phase) = acc
+            val (bus2Period, bus2Phase) = bus
             val combinedPeriod = bus1Period * bus2Period
             val combinedPhase = findMatchedPhase(bus1Period, bus1Phase, bus2Period, bus2Phase)
-            Pair(combinedPhase, combinedPeriod)
+            Pair(combinedPeriod, combinedPhase)
         }.let {
-            (it.first + it.second) % it.second
+            (it.first + it.second) % it.first
         }
     }
 
