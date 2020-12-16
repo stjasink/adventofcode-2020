@@ -90,33 +90,47 @@ class Day13 : Solver {
         return mustBeDivisibleBy.reduce { acc, bus ->
             val (bus1Phase, bus1Period) = acc
             val (bus2Phase, bus2Period) = bus
+//            if (bus1Phase > Integer.MAX_VALUE) println("a in gcd is over")
+//            println("bus1Phase less than MAX_INT: ${bus1Phase < Integer.MAX_VALUE}")
+//            println("bus1Period less than MAX_INT: ${bus1Period < Integer.MAX_VALUE}")
+//            println("bus2Phase less than MAX_INT: ${bus2Phase < Integer.MAX_VALUE}")
+//            println("bus2Period less than MAX_INT: ${bus2Period < Integer.MAX_VALUE}")
             val (combinedPeriod, combinedPhase) = combine_phased_rotations(bus1Period, bus1Phase, bus2Period, bus2Phase)
             println("Buses $bus1Period/$bus1Phase and $bus2Period/$bus2Phase align at $combinedPeriod/$combinedPhase (${(combinedPhase + combinedPeriod) % combinedPeriod})")
+            if ((combinedPhase - bus1Phase) % bus1Period != 0L) println("Bus 1 bad alignment")
+            if ((combinedPhase - bus2Phase) % bus2Period != 0L) println("Bus 2 bad alignment")
             Pair(combinedPhase, combinedPeriod)
         }.let {
             (it.first + it.second) % it.second
         }
     }
 
-    fun bus_alignment(red_len: Long, green_len: Long, advantage: Long): Long {
-        val (period, phase) = combine_phased_rotations(
-            red_len, 0, green_len, (-advantage % green_len).let { if (it < 0) it + green_len else it }
-        )
-        return (-phase % period).let { if (it < 0) it + period else it }
-    }
+//    fun bus_alignment(red_len: Long, green_len: Long, advantage: Long): Long {
+//        val (period, phase) = combine_phased_rotations(
+//            red_len, 0, green_len, (-advantage % green_len).let { if (it < 0) it + green_len else it }
+//        )
+//        return (-phase % period).let { if (it < 0) it + period else it }
+//    }
 
     fun combine_phased_rotations(a_period: Long, a_phase: Long, b_period: Long, b_phase: Long): Pair<Long, Long> {
+        if (a_period > Integer.MAX_VALUE) println("a_period in cpr is over")
+        if (a_phase > Integer.MAX_VALUE) println("a_phase in cpr is over")
+        if (b_period > Integer.MAX_VALUE) println("b_period in cpr is over")
+        if (b_phase > Integer.MAX_VALUE) println("b_phase in cpr is over")
         val (gcd, s, t) = extended_gcd(a_period, b_period)
         val phase_difference = a_phase - b_phase
         val pd_mult = phase_difference / gcd
         val pd_remainder = phase_difference % gcd
-        if (pd_remainder > 0) throw IllegalStateException("Bus $a_period and $b_period never synchronise")
-        val combined_period = a_period / gcd * b_period
+        if (pd_remainder > 0L) throw IllegalStateException("Bus $a_period and $b_period never synchronise")
+        val combined_period = (a_period / gcd) * b_period
         val combined_phase = (a_phase - s * pd_mult * a_period) % combined_period
         return Pair(combined_period, combined_phase)
     }
 
     fun extended_gcd(a: Long, b: Long): Triple<Long, Long, Long> {
+        if (a > Integer.MAX_VALUE) println("a in gcd is over")
+        if (b > Integer.MAX_VALUE) println("b in gcd is over")
+
         var old_r = a
         var r = b
         var old_s = 1L
@@ -124,7 +138,12 @@ class Day13 : Solver {
         var old_t = 0L
         var t = 1L
 
-        while (r > 0) {
+        println("before")
+        if (old_r > Integer.MAX_VALUE) println("old_r in gcd is over")
+        if (old_s > Integer.MAX_VALUE) println("old_s in gcd is over")
+        if (old_t > Integer.MAX_VALUE) println("old_t in gcd is over")
+
+        while (r > 0L) {
             val quotient = old_r / r
             val remainder = old_r % r
 
@@ -140,22 +159,12 @@ class Day13 : Solver {
             old_t = temp_t
         }
 
+        println("after")
+        if (old_r > Integer.MAX_VALUE) println("old_r in gcd is over")
+        if (old_s > Integer.MAX_VALUE) println("old_s in gcd is over")
+        if (old_t > Integer.MAX_VALUE) println("old_t in gcd is over")
+
         return Triple(old_r, old_s, old_t)
-    }
-
-    private fun lcm(n1: Long, n2: Long): Long {
-        // maximum number between n1 and n2 is stored in lcm
-        var lcm = if (n1 > n2) n1 else n2
-
-        // Always true
-        while (true) {
-            if (lcm % n1 == 0L && lcm % n2 == 0L) {
-                println("The LCM of $n1 and $n2 is $lcm.")
-                break
-            }
-            ++lcm
-        }
-        return lcm
     }
 
     private fun firstArrivalAfter(time: Int, busId: Int): Int {

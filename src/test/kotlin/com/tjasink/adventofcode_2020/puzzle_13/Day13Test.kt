@@ -61,4 +61,15 @@ class Day13Test {
 
     }
 
+    @Test
+    fun part2RealData() {
+        val input = listOf("random",
+            "13,x,x,x,x,x,x,37,x,x,x,x,x,449,x,29,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,19,x,x,x,23,x,x,x,x,x,x,x,773,x,x,x,x,x,x,x,x,x,41,x,x,x,x,x,x,17")
+        val answer = Day13().part2(input)
+        println(answer)
+
+        // correct:  Buses 118998919/103805195 and 23/-36 align at 2736975137/-2395172104 (341803033)
+        // next one is wrong: Buses 2736975137/-2395172104 and 773/-44 align at 2115681780901/-929836888210 (1185844892691)
+    }
+
 }
