@@ -23,6 +23,16 @@ class Day13Test {
     }
 
     @Test
+    fun part2Real() {
+        val realInput = """
+            1002576
+            13,x,x,x,x,x,x,37,x,x,x,x,x,449,x,29,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,19,x,x,x,23,x,x,x,x,x,x,x,773,x,x,x,x,x,x,x,x,x,41,x,x,x,x,x,x,17
+        """.trimIndent().split('\n')
+        val answer = Day13().part2(realInput)
+        Assertions.assertEquals(415579909629976, answer)
+    }
+
+    @Test
     fun part2TestDifferentExamples() {
         val inputs = listOf(
             "17,x,13,19" to 3417L,

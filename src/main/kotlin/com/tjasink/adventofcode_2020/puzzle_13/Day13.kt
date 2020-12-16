@@ -18,40 +18,23 @@ class Day13 : Solver {
         val firstBusArrivalsAfterMyArrival = busIds.map { busId -> firstArrivalAfter(myEarliestArrival, busId) }
         val earliestBusAndWaitTime = busIds.zip(firstBusArrivalsAfterMyArrival)
             .map { Pair(it.first, it.second - myEarliestArrival) }
-            .sortedBy { it.second }
-            .first()
-
+            .minByOrNull { it.second }!!
         return earliestBusAndWaitTime.first.toLong() * earliestBusAndWaitTime.second.toLong()
     }
 
     override fun part2(input: List<String>): Long {
-        val busIds = input[1].split(',').map { if (it == "x") null else it.toLong() }
-        val mustBeDivisibleBy = busIds
-            // map to (period, phase)
-            .mapIndexed { index, busId -> Pair(busId, index.toLong()) }
-            .filter { it.first != null }
-            .map { it.first!! to it.second }
-
-        return mustBeDivisibleBy.reduce { acc, bus ->
-            val (bus1Period, bus1Phase) = acc
-            val (bus2Period, bus2Phase) = bus
-            val combinedPeriod = bus1Period * bus2Period
-            val combinedPhase = findMatchedPhase(bus1Period, bus1Phase, bus2Period, bus2Phase)
-            Pair(combinedPeriod, combinedPhase)
-        }.let {
-            (it.first + it.second) % it.first
-        }
+        return input[1].split(',')
+            .mapIndexed { index, it -> if (it == "x") null else Bus(period = it.toLong(), phase = index.toLong()) }
+            .filterNotNull()
+            .reduce { accBus, newBus ->
+                Bus(period = accBus.period * newBus.period, phase = findCoincidingPosition(accBus, newBus))
+            }.phase
     }
 
-    private fun findMatchedPhase(bus1Period: Long, bus1Phase: Long, bus2Period: Long, bus2Phase: Long): Long {
-        var bus1Position = bus1Phase
-        while (true) {
-            val potentialBus2Position = bus1Position + bus2Phase
-            if (potentialBus2Position % bus2Period == 0L) {
-                return bus1Position
-            }
-            bus1Position += bus1Period
-        }
+    private fun findCoincidingPosition(bus1: Bus, bus2: Bus): Long {
+        var position = bus1.phase
+        while ((position + bus2.phase) % bus2.period != 0L) position += bus1.period
+        return position
     }
 
     private fun firstArrivalAfter(time: Int, busId: Int): Int {
@@ -61,4 +44,9 @@ class Day13 : Solver {
         }
         return arrivalTime
     }
+
+    data class Bus(
+        val period: Long,
+        val phase: Long
+    )
 }
