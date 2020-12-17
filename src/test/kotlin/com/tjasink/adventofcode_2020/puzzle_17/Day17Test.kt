@@ -25,7 +25,7 @@ class Day17Test {
             ###
         """.trimIndent().split('\n')
 
-        val answer = Day17Part2().part2(input)
+        val answer = Day17().part2(input)
         Assertions.assertEquals(848, answer)
 
     }

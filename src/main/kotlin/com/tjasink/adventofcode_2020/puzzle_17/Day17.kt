@@ -26,9 +26,14 @@ class Day17 : Solver {
     }
 
     override fun part2(input: List<String>): Long {
-        return 0L
-    }
+        var plan = HyperCubePlan(listOf(listOf(input)))
+        for (round in 0 until 6) {
+            val newPlan = plan.nextRoundPart2Rules()
+            plan = newPlan
+        }
 
+        return plan.countAllActive().toLong()
+    }
 
     class CubePlan(
         val data: List<List<String>>
@@ -49,12 +54,6 @@ class Day17 : Solver {
                 }
             )
         }
-
-//        fun nextRoundPart2Rules(): CubePlan {
-//            return nextRound(
-//                inActiveFlipRule = { x, y, z -> countVisibleOccupied(x, y, z) == 0 },
-//                activeFlipRule = { x, y, z -> countVisibleOccupied(x, y, z) >= 5 })
-//        }
 
         private fun nextRound(inActiveFlipRule: (Int, Int, Int) -> Boolean, activeFlipRule: (Int, Int, Int) -> Boolean): CubePlan {
             val newPlan = mutableListOf<MutableList<String>>()
@@ -83,11 +82,8 @@ class Day17 : Solver {
                         newRow.append(newState)
                     }
                     newYBit.add(newRow.toString())
-//                    println()
                 }
                 newPlan.add(newYBit)
-//                println()
-//                println()
             }
 
             return CubePlan(newPlan)
@@ -116,118 +112,9 @@ class Day17 : Solver {
                     }
                 }
             }
-//            print(count)
 
             return count
         }
-
-//        private fun countVisibleOccupied(xPos: Int, yPos: Int): Int {
-//            var count = 0
-//
-//            if (xPos < xSize - 1) {
-//                for (x in xPos + 1 until xSize) {
-//                    if (data[yPos][x] == Active) {
-//                        count += 1
-//                        break
-//                    } else if (data[yPos][x] == EmptySeat) {
-//                        break
-//                    }
-//                }
-//            }
-//            if (xPos > 0) {
-//                for (x in xPos - 1 downTo 0) {
-//                    if (data[yPos][x] == Active) {
-//                        count += 1
-//                        break
-//                    } else if (data[yPos][x] == EmptySeat) {
-//                        break
-//                    }
-//                }
-//            }
-//
-//            if (yPos < ySize - 1) {
-//                for (y in yPos + 1 until ySize) {
-//                    if (data[y][xPos] == Active) {
-//                        count += 1
-//                        break
-//                    } else if (data[y][xPos] == EmptySeat) {
-//                        break
-//                    }
-//                }
-//            }
-//            if (yPos > 0) {
-//                for (y in yPos - 1 downTo 0) {
-//                    if (data[y][xPos] == Active) {
-//                        count += 1
-//                        break
-//                    } else if (data[y][xPos] == EmptySeat) {
-//                        break
-//                    }
-//                }
-//            }
-//
-//            run {
-//                var x = xPos - 1
-//                var y = yPos - 1
-//                while (x >= 0 && y >= 0 && x < xSize && y < ySize) {
-//                    if (data[y][x] == Active) {
-//                        count += 1
-//                        break
-//                    } else if (data[y][x] == EmptySeat) {
-//                        break
-//                    }
-//                    x -= 1
-//                    y -= 1
-//                }
-//            }
-//
-//            run {
-//                var x = xPos + 1
-//                var y = yPos + 1
-//                while (x >= 0 && y >= 0 && x < xSize && y < ySize) {
-//                    if (data[y][x] == Active) {
-//                        count += 1
-//                        break
-//                    } else if (data[y][x] == EmptySeat) {
-//                        break
-//                    }
-//                    x += 1
-//                    y += 1
-//                }
-//            }
-//
-//            run {
-//                var x = xPos - 1
-//                var y = yPos + 1
-//                while (x >= 0 && y >= 0 && x < xSize && y < ySize) {
-//                    if (data[y][x] == Active) {
-//                        count += 1
-//                        break
-//                    } else if (data[y][x] == EmptySeat) {
-//                        break
-//                    }
-//                    x -= 1
-//                    y += 1
-//                }
-//            }
-//
-//            run {
-//                var x = xPos + 1
-//                var y = yPos - 1
-//                while (x >= 0 && y >= 0 && x < xSize && y < ySize) {
-//                    if (data[y][x] == Active) {
-//                        count += 1
-//                        break
-//                    } else if (data[y][x] == EmptySeat) {
-//                        break
-//                    }
-//                    x += 1
-//                    y -= 1
-//                }
-//            }
-//
-//            return count
-//        }
 
         fun countAllActive(): Int {
             var count = 0
@@ -243,9 +130,9 @@ class Day17 : Solver {
             return count
         }
 
-        fun print() {
+        fun print(roundNum: Int) {
             for (z in 0 until zSize) {
-                println("z = $z")
+                println("z = ${z-roundNum}")
                 println()
                 for (y in 0 until ySize) {
                     println(rowAt(y, z))
@@ -256,6 +143,136 @@ class Day17 : Solver {
 
         private fun rowAt(yPos: Int, zPos: Int): String {
             return data[zPos][yPos]
+        }
+    }
+
+    class HyperCubePlan(
+        val data: List<List<List<String>>>
+    ) {
+        val xSize = data.first().first().first().length
+        val ySize = data.first().first().size
+        val zSize = data.first().size
+        val wSize = data.size
+
+        val Active = '#'
+        val InActive = '.'
+
+        fun nextRoundPart2Rules(): HyperCubePlan {
+            return nextRound(
+                inActiveFlipRule = { x, y, z, w -> countAdjacentActive(x, y, z, w) == 3 },
+                activeFlipRule = { x, y, z, w ->
+                    val activeNeighbours = countAdjacentActive(x, y, z, w)
+                    activeNeighbours != 2 && activeNeighbours != 3
+                }
+            )
+        }
+
+        private fun nextRound(inActiveFlipRule: (Int, Int, Int, Int) -> Boolean, activeFlipRule: (Int, Int, Int, Int) -> Boolean): HyperCubePlan {
+            val newPlan = mutableListOf<MutableList<MutableList<String>>>()
+            for (w in -1 until wSize + 1) {
+                val newZBit = mutableListOf<MutableList<String>>()
+                for (z in -1 until zSize + 1) {
+                    val newYBit = mutableListOf<String>()
+                    for (y in -1 until xSize + 1) {
+                        val newRow = StringBuilder()
+                        for (x in -1 until ySize + 1) {
+                            val newState = when (stateAt(x, y, z, w)) {
+                                InActive -> {
+                                    if (inActiveFlipRule(x, y, z, w)) {
+                                        Active
+                                    } else {
+                                        InActive
+                                    }
+                                }
+                                Active -> {
+                                    if (activeFlipRule(x, y, z, w)) {
+                                        InActive
+                                    } else {
+                                        Active
+                                    }
+                                }
+                                else -> throw IllegalStateException("WAT")
+                            }
+                            newRow.append(newState)
+                        }
+                        newYBit.add(newRow.toString())
+                        //                    println()
+                    }
+                    newZBit.add(newYBit)
+                    //                println()
+                    //                println()
+                }
+                newPlan.add(newZBit)
+            }
+
+            return HyperCubePlan(newPlan)
+        }
+
+        private fun stateAt(xPos: Int, yPos: Int, zPos: Int, wPos: Int): Char {
+            return if (xPos < 0 || xPos >= xSize
+                || yPos < 0 || yPos >= ySize
+                || zPos < 0 || zPos >= zSize
+                || wPos < 0 || wPos >= wSize) {
+                InActive
+            } else {
+                data[wPos][zPos][yPos][xPos]
+            }
+        }
+
+        private fun countAdjacentActive(xPos: Int, yPos: Int, zPos: Int, wPos: Int): Int {
+            var count = 0
+            for (w in wPos - 1 .. wPos + 1) {
+                for (z in zPos - 1..zPos + 1) {
+                    for (y in yPos - 1..yPos + 1) {
+                        for (x in xPos - 1..xPos + 1) {
+                            if (x >= 0 && y >= 0 && z >= 0 && w >= 0
+                                && x < xSize && y < ySize && z < zSize && w < wSize
+                                && !(x == xPos && y == yPos && z == zPos && w == wPos)
+                            ) {
+                                if (stateAt(x, y, z, w) == Active) {
+                                    count += 1
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+//            print(count)
+
+            return count
+        }
+
+        fun countAllActive(): Int {
+            var count = 0
+            for (w in 0 until wSize) {
+                for (z in 0 until zSize) {
+                    for (y in 0 until ySize) {
+                        for (x in 0 until xSize) {
+                            if (stateAt(x, y, z, w) == Active) {
+                                count += 1
+                            }
+                        }
+                    }
+                }
+            }
+            return count
+        }
+
+        fun print(roundNum: Int) {
+            for (w in 0 until wSize) {
+                for (z in 0 until zSize) {
+                    println("z=${z-roundNum}, w=${w-roundNum}")
+                    println()
+                    for (y in 0 until ySize) {
+                        println(rowAt(y, z, w))
+                    }
+                    println()
+                }
+            }
+        }
+
+        private fun rowAt(yPos: Int, zPos: Int, wPos: Int): String {
+            return data[wPos][zPos][yPos]
         }
     }
 }
