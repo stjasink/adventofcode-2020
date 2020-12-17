@@ -63,20 +63,8 @@ class Day17 : Solver {
                     val newRow = StringBuilder()
                     for (x in -1 until ySize + 1) {
                         val newState = when (stateAt(x, y, z)) {
-                            InActive -> {
-                                if (inActiveFlipRule(x, y, z)) {
-                                    Active
-                                } else {
-                                    InActive
-                                }
-                            }
-                            Active -> {
-                                if (activeFlipRule(x, y, z)) {
-                                    InActive
-                                } else {
-                                    Active
-                                }
-                            }
+                            InActive -> if (inActiveFlipRule(x, y, z)) Active else InActive
+                            Active -> if (activeFlipRule(x, y, z)) InActive else Active
                             else -> throw IllegalStateException("WAT")
                         }
                         newRow.append(newState)
@@ -177,30 +165,15 @@ class Day17 : Solver {
                         val newRow = StringBuilder()
                         for (x in -1 until ySize + 1) {
                             val newState = when (stateAt(x, y, z, w)) {
-                                InActive -> {
-                                    if (inActiveFlipRule(x, y, z, w)) {
-                                        Active
-                                    } else {
-                                        InActive
-                                    }
-                                }
-                                Active -> {
-                                    if (activeFlipRule(x, y, z, w)) {
-                                        InActive
-                                    } else {
-                                        Active
-                                    }
-                                }
+                                InActive -> if (inActiveFlipRule(x, y, z, w)) Active else InActive
+                                Active -> if (activeFlipRule(x, y, z, w)) InActive else Active
                                 else -> throw IllegalStateException("WAT")
                             }
                             newRow.append(newState)
                         }
                         newYBit.add(newRow.toString())
-                        //                    println()
                     }
                     newZBit.add(newYBit)
-                    //                println()
-                    //                println()
                 }
                 newPlan.add(newZBit)
             }
