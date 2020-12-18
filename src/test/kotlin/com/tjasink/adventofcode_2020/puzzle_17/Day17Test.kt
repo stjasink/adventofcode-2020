@@ -2,7 +2,6 @@ package com.tjasink.adventofcode_2020.puzzle_17
 
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
-import com.tjasink.adventofcode_2020.puzzle_17.Day17.Plan.Vector
 
 class Day17Test {
     
@@ -45,9 +44,9 @@ class Day17Test {
     @Test
     fun `should find neighbours for point`() {
         val inputsAndExpectedOutputs = mapOf(
-            Vector(0) to setOf(Vector(-1), Vector(1)),
-            Vector(5) to setOf(Vector(4), Vector(6)),
-            Vector(0,0) to setOf(Vector(-1,-1), Vector(-1, 0), Vector(-1, 1), Vector(0, -1), Vector(0, 1), Vector(1, -1), Vector(1, 0), Vector(1, 1))
+            listOf(0) to setOf(listOf(-1), listOf(1)),
+            listOf(5) to setOf(listOf(4), listOf(6)),
+            listOf(0,0) to setOf(listOf(-1,-1), listOf(-1, 0), listOf(-1, 1), listOf(0, -1), listOf(0, 1), listOf(1, -1), listOf(1, 0), listOf(1, 1))
         )
 
         inputsAndExpectedOutputs.forEach {

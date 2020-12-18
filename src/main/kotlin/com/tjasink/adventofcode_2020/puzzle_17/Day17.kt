@@ -40,15 +40,15 @@ class Day17 : Solver {
     private fun generateStartPoints(
         input: List<String>,
         numDimensionsNeeded: Int
-    ): MutableSet<Plan.Vector> {
-        val startPoints = mutableSetOf<Plan.Vector>()
+    ): Set<Vector> {
+        val startPoints = mutableSetOf<Vector>()
         for (y in input.indices) {
             for (x in input[y].indices) {
                 if (input[y][x] == '#') {
                     val components2d = listOf(x, y)
                     val moreDimensionsNeeded = numDimensionsNeeded - 2
                     val components = components2d + Array(moreDimensionsNeeded) { 0 }
-                    startPoints.add(Plan.Vector(components))
+                    startPoints.add(components)
                 }
             }
         }
@@ -85,9 +85,9 @@ class Day17 : Solver {
         fun countActiveNeighboursFor(point: Vector, activePoints: Set<Vector>): Int {
             val neighbours = findNeighboursFor(point)
             val activeNeighbours = neighbours.intersect(activePoints)
-//            println("Counting for ${point.components}")
+//            println("Counting for ${point}")
 //            activeNeighbours.forEach {
-//                println(it.components)
+//                println(it)
 //            }
             return activeNeighbours.size
         }
@@ -101,50 +101,24 @@ class Day17 : Solver {
 
 
         companion object {
-            fun findDimensionRanges(fromPoints: Set<Vector>): Array<Int> {
-                val numDimensions = fromPoints.first().components.size
-                val dimensionSizes = Array(numDimensions) { 0 }
-                fromPoints.forEach { coord ->
-                    coord.components.forEachIndexed { pos, value ->
-                        dimensionSizes[pos] = max(dimensionSizes[pos], value + 1)
-                    }
-                }
-                return dimensionSizes
-            }
-
             fun findNeighboursFor(point: Vector): Set<Vector> {
                 return findNeighboursAndSelfFor(point) - setOf(point)
             }
 
             fun findNeighboursAndSelfFor(point: Vector): Set<Vector> {
-                if (point.components.size == 1) {
-                    return listOf(
-                        point.components.first() - 1,
-                        point.components.first(),
-                        point.components.first() + 1
-                    ).map { Vector(listOf(it)) }.toSet()
+                if (point.size == 1) {
+                    return setOf(listOf(point.first() - 1), listOf(point.first()), listOf(point.first() + 1))
                 }
-                val neighboursIgnoringFirstDimension =
-                    findNeighboursAndSelfFor(Vector(components = point.components.drop(1)))
+                val neighboursIgnoringFirstDimension = findNeighboursAndSelfFor(point.drop(1))
                 val allComponents =
-                    (point.components.first() - 1..point.components.first() + 1).flatMap { newFirstDimValue ->
-                        neighboursIgnoringFirstDimension.map { listOf(newFirstDimValue) + it.components }
+                    (point.first() - 1..point.first() + 1).flatMap { newFirstDimValue ->
+                        neighboursIgnoringFirstDimension.map { listOf(newFirstDimValue) + it }
                     }
-                return allComponents.map { Vector(it) }.toSet()
+                return allComponents.toSet()
             }
-
         }
-
-        data class Vector(
-            val components: List<Int>
-        ) {
-            constructor(vararg c: Int) : this(components = c.toList())
-        }
-
-
-
     }
-
 }
 
-//typealias Vector = List<Int>
+typealias Vector = List<Int>
+
