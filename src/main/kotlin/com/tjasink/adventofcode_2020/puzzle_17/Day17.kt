@@ -4,6 +4,7 @@ import com.tjasink.adventofcode_2020.common.Solver
 import com.tjasink.adventofcode_2020.common.loadInput
 import com.tjasink.adventofcode_2020.common.runAndTime
 import java.lang.StringBuilder
+import kotlin.math.max
 
 fun main() {
     val input = loadInput("puzzle_17/data.txt")
@@ -14,238 +15,136 @@ fun main() {
 class Day17 : Solver {
 
     override fun part1(input: List<String>): Long {
-        var plan = CubePlan(listOf(input))
-//        plan.print()
-        for (round in 0 until 6) {
-            val newPlan = plan.nextRoundPart1Rules()
-//            newPlan.print()
-            plan = newPlan
-        }
-
-        return plan.countAllActive().toLong()
+        return calculateForStartPlaneAndDimensions(input, 3)
     }
 
     override fun part2(input: List<String>): Long {
-        var plan = HyperCubePlan(listOf(listOf(input)))
+        return calculateForStartPlaneAndDimensions(input, 4)
+    }
+
+    fun calculateForStartPlaneAndDimensions(
+        input: List<String>,
+        numDimensionsNeeded: Int
+    ): Long {
+        val startPoints = generateStartPoints(input, numDimensionsNeeded)
+
+        var plan = Plan(startPoints)
         for (round in 0 until 6) {
-            val newPlan = plan.nextRoundPart2Rules()
+            val newPlan = plan.nextRound()
             plan = newPlan
         }
 
         return plan.countAllActive().toLong()
     }
 
-    class CubePlan(
-        val data: List<List<String>>
-    ) {
-        val xSize = data.first().first().length
-        val ySize = data.first().size
-        val zSize = data.size
-
-        val Active = '#'
-        val InActive = '.'
-
-        fun nextRoundPart1Rules(): CubePlan {
-            return nextRound(
-                inActiveFlipRule = { x, y, z -> countAdjacentActive(x, y, z) == 3 },
-                activeFlipRule = { x, y, z ->
-                    val activeNeighbours = countAdjacentActive(x, y, z)
-                    activeNeighbours != 2 && activeNeighbours != 3
-                }
-            )
-        }
-
-        private fun nextRound(inActiveFlipRule: (Int, Int, Int) -> Boolean, activeFlipRule: (Int, Int, Int) -> Boolean): CubePlan {
-            val newPlan = mutableListOf<MutableList<String>>()
-            for (z in -1 until zSize + 1) {
-                val newYBit = mutableListOf<String>()
-                for (y in -1 until xSize + 1) {
-                    val newRow = StringBuilder()
-                    for (x in -1 until ySize + 1) {
-                        val newState = when (stateAt(x, y, z)) {
-                            InActive -> if (inActiveFlipRule(x, y, z)) Active else InActive
-                            Active -> if (activeFlipRule(x, y, z)) InActive else Active
-                            else -> throw IllegalStateException("WAT")
-                        }
-                        newRow.append(newState)
-                    }
-                    newYBit.add(newRow.toString())
-                }
-                newPlan.add(newYBit)
-            }
-
-            return CubePlan(newPlan)
-        }
-
-        private fun stateAt(xPos: Int, yPos: Int, zPos: Int): Char {
-            return if (xPos < 0 || xPos >= xSize || yPos < 0 || yPos >= ySize || zPos < 0 || zPos >= zSize) {
-                InActive
-            } else {
-                data[zPos][yPos][xPos]
-            }
-        }
-
-        private fun countAdjacentActive(xPos: Int, yPos: Int, zPos: Int): Int {
-            var count = 0
-            for (z in zPos - 1 .. zPos + 1) {
-                for (y in yPos - 1 .. yPos + 1) {
-                    for (x in xPos - 1 .. xPos + 1) {
-                        if (x >= 0 && y >= 0 && z >= 0
-                            && x < xSize && y < ySize && z < zSize
-                            && !(x == xPos && y == yPos && z == zPos)) {
-                            if (stateAt(x, y, z) == Active) {
-                                count += 1
-                            }
-                        }
-                    }
+    private fun generateStartPoints(
+        input: List<String>,
+        numDimensionsNeeded: Int
+    ): MutableSet<Plan.Vector> {
+        val startPoints = mutableSetOf<Plan.Vector>()
+        for (y in input.indices) {
+            for (x in input[y].indices) {
+                if (input[y][x] == '#') {
+                    val components2d = listOf(x, y)
+                    val moreDimensionsNeeded = numDimensionsNeeded - 2
+                    val components = components2d + Array(moreDimensionsNeeded) { 0 }
+                    startPoints.add(Plan.Vector(components))
                 }
             }
-
-            return count
         }
-
-        fun countAllActive(): Int {
-            var count = 0
-            for (z in 0 until zSize) {
-                for (y in 0 until ySize) {
-                    for (x in 0 until xSize) {
-                        if (stateAt(x, y, z) == Active) {
-                            count += 1
-                        }
-                    }
-                }
-            }
-            return count
-        }
-
-        fun print(roundNum: Int) {
-            for (z in 0 until zSize) {
-                println("z = ${z-roundNum}")
-                println()
-                for (y in 0 until ySize) {
-                    println(rowAt(y, z))
-                }
-                println()
-            }
-        }
-
-        private fun rowAt(yPos: Int, zPos: Int): String {
-            return data[zPos][yPos]
-        }
+        return startPoints
     }
 
-    class HyperCubePlan(
-        val data: List<List<List<String>>>
+    class Plan(
+        val activePoints: Set<Vector>
     ) {
-        val xSize = data.first().first().first().length
-        val ySize = data.first().first().size
-        val zSize = data.first().size
-        val wSize = data.size
+        fun nextRound(): Plan {
+            val newActivePoints = mutableSetOf<Vector>()
 
-        val Active = '#'
-        val InActive = '.'
+            val inactiveNeighbours = findAllInactiveNeighboursOfActivePoints()
 
-        fun nextRoundPart2Rules(): HyperCubePlan {
-            return nextRound(
-                inActiveFlipRule = { x, y, z, w -> countAdjacentActive(x, y, z, w) == 3 },
-                activeFlipRule = { x, y, z, w ->
-                    val activeNeighbours = countAdjacentActive(x, y, z, w)
-                    activeNeighbours != 2 && activeNeighbours != 3
+            for (point in inactiveNeighbours) {
+                val numActiveNeighbours = countActiveNeighboursFor(point, activePoints)
+                val isNewActive = (numActiveNeighbours == 3)
+                if (isNewActive) {
+                    newActivePoints.add(point)
                 }
-            )
-        }
-
-        private fun nextRound(inActiveFlipRule: (Int, Int, Int, Int) -> Boolean, activeFlipRule: (Int, Int, Int, Int) -> Boolean): HyperCubePlan {
-            val newPlan = mutableListOf<MutableList<MutableList<String>>>()
-            for (w in -1 until wSize + 1) {
-                val newZBit = mutableListOf<MutableList<String>>()
-                for (z in -1 until zSize + 1) {
-                    val newYBit = mutableListOf<String>()
-                    for (y in -1 until xSize + 1) {
-                        val newRow = StringBuilder()
-                        for (x in -1 until ySize + 1) {
-                            val newState = when (stateAt(x, y, z, w)) {
-                                InActive -> if (inActiveFlipRule(x, y, z, w)) Active else InActive
-                                Active -> if (activeFlipRule(x, y, z, w)) InActive else Active
-                                else -> throw IllegalStateException("WAT")
-                            }
-                            newRow.append(newState)
-                        }
-                        newYBit.add(newRow.toString())
-                    }
-                    newZBit.add(newYBit)
-                }
-                newPlan.add(newZBit)
             }
 
-            return HyperCubePlan(newPlan)
-        }
-
-        private fun stateAt(xPos: Int, yPos: Int, zPos: Int, wPos: Int): Char {
-            return if (xPos < 0 || xPos >= xSize
-                || yPos < 0 || yPos >= ySize
-                || zPos < 0 || zPos >= zSize
-                || wPos < 0 || wPos >= wSize) {
-                InActive
-            } else {
-                data[wPos][zPos][yPos][xPos]
+            for (point in activePoints) {
+                val numActiveNeighbours = countActiveNeighboursFor(point, activePoints)
+                val isNewActive = (numActiveNeighbours == 2 || numActiveNeighbours == 3)
+                if (isNewActive) {
+                    newActivePoints.add(point)
+                }
             }
+
+            return Plan(newActivePoints)
         }
 
-        private fun countAdjacentActive(xPos: Int, yPos: Int, zPos: Int, wPos: Int): Int {
-            var count = 0
-            for (w in wPos - 1 .. wPos + 1) {
-                for (z in zPos - 1..zPos + 1) {
-                    for (y in yPos - 1..yPos + 1) {
-                        for (x in xPos - 1..xPos + 1) {
-                            if (x >= 0 && y >= 0 && z >= 0 && w >= 0
-                                && x < xSize && y < ySize && z < zSize && w < wSize
-                                && !(x == xPos && y == yPos && z == zPos && w == wPos)
-                            ) {
-                                if (stateAt(x, y, z, w) == Active) {
-                                    count += 1
-                                }
-                            }
-                        }
+        fun countActiveNeighboursFor(point: Vector, activePoints: Set<Vector>): Int {
+            val neighbours = findNeighboursFor(point)
+            val activeNeighbours = neighbours.intersect(activePoints)
+//            println("Counting for ${point.components}")
+//            activeNeighbours.forEach {
+//                println(it.components)
+//            }
+            return activeNeighbours.size
+        }
+
+        fun findAllInactiveNeighboursOfActivePoints(): Set<Vector> {
+            val allNeighbours = activePoints.flatMap { findNeighboursFor(it) }.toSet()
+            return allNeighbours - activePoints
+        }
+
+        fun countAllActive() = activePoints.size
+
+
+        companion object {
+            fun findDimensionRanges(fromPoints: Set<Vector>): Array<Int> {
+                val numDimensions = fromPoints.first().components.size
+                val dimensionSizes = Array(numDimensions) { 0 }
+                fromPoints.forEach { coord ->
+                    coord.components.forEachIndexed { pos, value ->
+                        dimensionSizes[pos] = max(dimensionSizes[pos], value + 1)
                     }
                 }
+                return dimensionSizes
             }
-//            print(count)
 
-            return count
-        }
+            fun findNeighboursFor(point: Vector): Set<Vector> {
+                return findNeighboursAndSelfFor(point) - setOf(point)
+            }
 
-        fun countAllActive(): Int {
-            var count = 0
-            for (w in 0 until wSize) {
-                for (z in 0 until zSize) {
-                    for (y in 0 until ySize) {
-                        for (x in 0 until xSize) {
-                            if (stateAt(x, y, z, w) == Active) {
-                                count += 1
-                            }
-                        }
-                    }
+            fun findNeighboursAndSelfFor(point: Vector): Set<Vector> {
+                if (point.components.size == 1) {
+                    return listOf(
+                        point.components.first() - 1,
+                        point.components.first(),
+                        point.components.first() + 1
+                    ).map { Vector(listOf(it)) }.toSet()
                 }
-            }
-            return count
-        }
-
-        fun print(roundNum: Int) {
-            for (w in 0 until wSize) {
-                for (z in 0 until zSize) {
-                    println("z=${z-roundNum}, w=${w-roundNum}")
-                    println()
-                    for (y in 0 until ySize) {
-                        println(rowAt(y, z, w))
+                val neighboursIgnoringFirstDimension =
+                    findNeighboursAndSelfFor(Vector(components = point.components.drop(1)))
+                val allComponents =
+                    (point.components.first() - 1..point.components.first() + 1).flatMap { newFirstDimValue ->
+                        neighboursIgnoringFirstDimension.map { listOf(newFirstDimValue) + it.components }
                     }
-                    println()
-                }
+                return allComponents.map { Vector(it) }.toSet()
             }
+
         }
 
-        private fun rowAt(yPos: Int, zPos: Int, wPos: Int): String {
-            return data[wPos][zPos][yPos]
+        data class Vector(
+            val components: List<Int>
+        ) {
+            constructor(vararg c: Int) : this(components = c.toList())
         }
+
+
+
     }
+
 }
+
+//typealias Vector = List<Int>
