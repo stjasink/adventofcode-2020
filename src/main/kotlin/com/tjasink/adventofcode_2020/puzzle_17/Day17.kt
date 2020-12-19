@@ -83,8 +83,7 @@ class Day17 : Solver {
         }
 
         fun countActiveNeighboursFor(point: Vector, activePoints: Set<Vector>): Int {
-            val neighbours = findNeighboursFor(point)
-            val activeNeighbours = neighbours.intersect(activePoints)
+            val activeNeighbours = point.neighbours().intersect(activePoints)
 //            println("Counting for ${point}")
 //            activeNeighbours.forEach {
 //                println(it)
@@ -93,32 +92,29 @@ class Day17 : Solver {
         }
 
         fun findAllInactiveNeighboursOfActivePoints(): Set<Vector> {
-            val allNeighbours = activePoints.flatMap { findNeighboursFor(it) }.toSet()
+            val allNeighbours = activePoints.flatMap { it.neighbours() }.toSet()
             return allNeighbours - activePoints
         }
 
         fun countAllActive() = activePoints.size
 
-
-        companion object {
-            fun findNeighboursFor(point: Vector): Set<Vector> {
-                return findNeighboursAndSelfFor(point) - setOf(point)
-            }
-
-            fun findNeighboursAndSelfFor(point: Vector): Set<Vector> {
-                if (point.size == 1) {
-                    return setOf(listOf(point.first() - 1), listOf(point.first()), listOf(point.first() + 1))
-                }
-                val neighboursIgnoringFirstDimension = findNeighboursAndSelfFor(point.drop(1))
-                val allComponents =
-                    (point.first() - 1..point.first() + 1).flatMap { newFirstDimValue ->
-                        neighboursIgnoringFirstDimension.map { listOf(newFirstDimValue) + it }
-                    }
-                return allComponents.toSet()
-            }
-        }
     }
 }
 
 typealias Vector = List<Int>
 
+fun Vector.neighbours(): Set<Vector> {
+    return neighboursAndSelf() - setOf(this)
+}
+
+private fun Vector.neighboursAndSelf(): Set<Vector> {
+    if (this.size == 1) {
+        return setOf(listOf(this.first() - 1), listOf(this.first()), listOf(this.first() + 1))
+    }
+    val neighboursIgnoringFirstDimension = this.drop(1).neighboursAndSelf()
+    val allComponents =
+        (this.first() - 1..this.first() + 1).flatMap { newFirstDimValue ->
+            neighboursIgnoringFirstDimension.map { listOf(newFirstDimValue) + it }
+        }
+    return allComponents.toSet()
+}

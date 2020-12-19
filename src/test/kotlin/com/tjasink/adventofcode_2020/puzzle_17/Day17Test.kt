@@ -50,7 +50,7 @@ class Day17Test {
         )
 
         inputsAndExpectedOutputs.forEach {
-            val output = Day17.Plan.findNeighboursFor(it.key)
+            val output = it.key.neighbours()
             assertEquals(it.value, output)
         }
 
