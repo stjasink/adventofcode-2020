@@ -15,16 +15,11 @@ class Day20 : Solver {
 
     override fun part1(input: List<String>): Long {
         val tiles = splitIntoTiles(input)
-        val cornerTiles = findCornerTiles(tiles)
-        return cornerTiles
-            .map { it.number.toLong() }
-            .reduce { acc, l -> acc * l }
-    }
-
-    private fun findCornerTiles(tiles: List<Tile>): List<Tile> {
-        val allEdgesWithCounts = tileEdgesWithCounts(tiles)
-        val edgesWithNoMatches = allEdgesWithCounts.filter { it.value == 1 }.map { it.key }
-        return tiles.filter { (it.edgesForAllFlips() intersect edgesWithNoMatches).size == 2 }
+        val grid = putTilesIntoCorrectPositions(tiles)
+        return grid.first().first()!!.number.toLong() *
+                grid.first().last()!!.number.toLong() *
+                grid.last().first()!!.number.toLong() *
+                grid.last().last()!!.number.toLong()
     }
 
     override fun part2(input: List<String>): Long {
