@@ -4,10 +4,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 class Day20Test {
-
-    @Test
-    fun part1Test() {
-        val input = """
+    val input = """
             Tile 2311:
             ..##.#..#.
             ##..#.....
@@ -117,16 +114,16 @@ class Day20Test {
             ..#.###...
         """.trimIndent().split('\n')
 
+    @Test
+    fun part1Test() {
         val answer = Day20().part1(input)
         assertEquals(20899048083289, answer)
     }
 
     @Test
     fun part2Test() {
-        val input = """""".trimIndent().split('\n')
-
         val answer = Day20().part2(input)
-        assertEquals(12, answer)
+        assertEquals(273, answer)
 
     }
 
