@@ -127,32 +127,4 @@ class Day20Test {
 
     }
 
-    @Test
-    fun part1TestRotation() {
-        val input = """
-            Tile 2311:
-            ..##.#..#.
-            ##..#.....
-            #...##..#.
-            ####.#...#
-            ##.##.###.
-            ##...#.###
-            .#.#.#..##
-            ..#....#..
-            ###...#.#.
-            ..###..###
-        """.trimIndent().split('\n')
-
-        val tile1 = Day20().splitIntoTiles(input).first()
-        val tile2 = tile1.rotateRight()
-
-        tile1.print()
-        val tile1Edges = tile1.edges()
-
-        tile2.print()
-        val tile2Edges = tile2.edges()
-
-        println(tile1Edges.toSet() == tile2Edges.toSet())
-    }
-
 }

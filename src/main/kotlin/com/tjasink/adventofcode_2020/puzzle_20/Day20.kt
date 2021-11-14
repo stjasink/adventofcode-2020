@@ -73,13 +73,13 @@ class Day20 : Solver {
                 listOf(image.rotateRight(2), image.rotateRight(2).flipX(), image.rotateRight(2).flipY(), image.rotateRight(2).flipX().flipY()) +
                 listOf(image.rotateRight(3), image.rotateRight(3).flipX(), image.rotateRight(3).flipY(), image.rotateRight(3).flipX().flipY())
 
-        val imageWithMonsters = allImageVersions.find { it.lookForSeaMonsters() > 0 }!!
+        val imageWithMonsters = allImageVersions.find { it.countSeaMonsters() > 0 }!!
 
         imageWithMonsters.print()
 
-        println("Num monsters: ${imageWithMonsters.lookForSeaMonsters()}")
+        println("Num monsters: ${imageWithMonsters.countSeaMonsters()}")
 
-        return (imageWithMonsters.countAllHashes() - (imageWithMonsters.lookForSeaMonsters() * 15)).toLong()
+        return (imageWithMonsters.countAllHashes() - (imageWithMonsters.countSeaMonsters() * 15)).toLong()
     }
 
     private fun combineTiles(grid: Array<Array<Tile?>>): Tile {
@@ -255,16 +255,16 @@ class Day20 : Solver {
             return Tile(number, newData, rotations, flippedX, flippedY)
         }
 
-        fun lookForSeaMonsters(): Int {
+        fun countSeaMonsters(): Int {
             val monsterLooksLike = "                  # \n#    ##    ##    ###\n #  #  #  #  #  #   "
 
-            val lineGapSize = data.first().length - 20
+            val lineGapSize = data.first().length - monsterLooksLike.length / 3
             val monsterRegex = monsterLooksLike
                 .replace(' ', '.')
 //                .replace("#", "(#)")
                 .split('\n')
                 .joinToString(".{$lineGapSize}")
-                .let { Regex(it) }
+                .let { Regex(it, RegexOption.MULTILINE) }
 
             val imageInOneString = data.joinToString("")
 

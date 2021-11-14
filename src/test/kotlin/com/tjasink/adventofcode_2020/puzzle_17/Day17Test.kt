@@ -37,7 +37,19 @@ class Day17Test {
             ###
         """.trimIndent().split('\n')
 
-        val answer = Day17().calculateForStartPlaneAndDimensions(input, 5)
+        val answer = Day17().calculateForStartPlaneAndDimensions(input, 5, 6)
+        assertEquals(5760, answer)
+    }
+
+    @Test
+    fun testFor6D() {
+        val input = """
+            .#.
+            ..#
+            ###
+        """.trimIndent().split('\n')
+
+        val answer = Day17().calculateForStartPlaneAndDimensions(input, 6, 4)
         assertEquals(5760, answer)
     }
 

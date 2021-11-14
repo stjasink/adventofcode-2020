@@ -3,8 +3,6 @@ package com.tjasink.adventofcode_2020.puzzle_17
 import com.tjasink.adventofcode_2020.common.Solver
 import com.tjasink.adventofcode_2020.common.loadInput
 import com.tjasink.adventofcode_2020.common.runAndTime
-import java.lang.StringBuilder
-import kotlin.math.max
 
 fun main() {
     val input = loadInput("puzzle_17/data.txt")
@@ -15,21 +13,22 @@ fun main() {
 class Day17 : Solver {
 
     override fun part1(input: List<String>): Long {
-        return calculateForStartPlaneAndDimensions(input, 3)
+        return calculateForStartPlaneAndDimensions(input, 3, 6)
     }
 
     override fun part2(input: List<String>): Long {
-        return calculateForStartPlaneAndDimensions(input, 4)
+        return calculateForStartPlaneAndDimensions(input, 4, 6)
     }
 
     fun calculateForStartPlaneAndDimensions(
         input: List<String>,
-        numDimensionsNeeded: Int
+        numDimensions: Int,
+        numTurns: Int
     ): Long {
-        val startPoints = generateStartPoints(input, numDimensionsNeeded)
+        val startPoints = generateStartPoints(input, numDimensions)
 
         var plan = Plan(startPoints)
-        for (round in 0 until 6) {
+        for (round in 0 until numTurns) {
             val newPlan = plan.nextRound()
             plan = newPlan
         }
