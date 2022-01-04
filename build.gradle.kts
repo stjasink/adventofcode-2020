@@ -15,7 +15,7 @@ repositories {
 dependencies {
 	implementation("org.jetbrains.kotlin:kotlin-reflect")
 	implementation("org.jetbrains.kotlin:kotlin-stdlib")
-	testImplementation("org.junit.jupiter:junit-jupiter:5.6.2")
+	testImplementation("org.junit.jupiter:junit-jupiter:5.8.2")
 	testImplementation("com.nhaarman.mockitokotlin2:mockito-kotlin:2.2.0")
 	testImplementation("org.skyscreamer:jsonassert:1.5.0")
 }
@@ -27,12 +27,12 @@ tasks.withType<Test> {
 tasks.withType<KotlinCompile> {
 	kotlinOptions {
 		freeCompilerArgs = listOf("-Xjsr305=strict")
-		jvmTarget = "14"
+		jvmTarget = "11"
 	}
 }
 
 buildscript {
 	repositories {
-		jcenter()
+		mavenCentral()
 	}
 }

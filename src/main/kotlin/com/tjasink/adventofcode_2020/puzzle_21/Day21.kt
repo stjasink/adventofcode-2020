@@ -13,72 +13,61 @@ fun main() {
 class Day21 : Solver {
 
     override fun part1(input: List<String>): Long {
-
-        val allIngredients = mutableSetOf<String>()
-        val allAllergens = mutableSetOf<String>()
-        val allergensToPotentialIngredients = mutableMapOf<String, MutableSet<String>>()
-        val ingredientsToPotentialAllergens = mutableMapOf<String, MutableSet<String>>()
+        val startAllergensToIngredients = mutableListOf<Pair<Set<String>, Set<String>>>()
+        val allergenToIngredient = mutableMapOf<String, String>()
 
         input.forEach { line ->
             val (ingredients, allergens) = parseIngredientsAndAllergens(line)
-            println("$ingredients $allergens")
-
-            allIngredients.addAll(ingredients)
-            allAllergens.addAll(allergens)
-
-            ingredients.forEach { ingredient ->
-                if (ingredientsToPotentialAllergens.containsKey(ingredient)) {
-                    ingredientsToPotentialAllergens[ingredient] = ingredientsToPotentialAllergens[ingredient]!!.union(allergens).toMutableSet()
-                } else {
-                    ingredientsToPotentialAllergens[ingredient] = allergens.toMutableSet()
-                }
-            }
-
-            allergens.forEach { allergen ->
-                if (allergensToPotentialIngredients.containsKey(allergen)) {
-                    allergensToPotentialIngredients[allergen] = allergensToPotentialIngredients[allergen]!!.union(ingredients).toMutableSet()
-                } else {
-                    allergensToPotentialIngredients[allergen] = ingredients.toMutableSet()
-                }
-            }
-
+            startAllergensToIngredients.add(Pair(allergens, ingredients))
         }
 
-        val allSingleAllergensToIngredients = mutableMapOf<String, String>()
-        var allergensWithOneIngredient = allergensToPotentialIngredients.filterValues { it.size == 1 }
-        while (allergensWithOneIngredient.isNotEmpty()) {
-            allergensWithOneIngredient.forEach { aToI ->
-                val allergen = aToI.value.first()
-                allSingleAllergensToIngredients.put(aToI.key, allergen)
-                allergensToPotentialIngredients.forEach { potential ->
-                    if (potential.value.contains(allergen)) {
-                        potential.value.remove(allergen)
+        var allergensToIngredients = mutableListOf<Pair<Set<String>, Set<String>>>()
+        allergensToIngredients.addAll(startAllergensToIngredients)
+        var newFound: Int
+        do {
+            newFound = 0
+            // check for any that have been reduced to one-to-one
+            allergensToIngredients.forEach { (allergens, ingredients) ->
+                if (allergens.size == 1 && ingredients.size == 1) {
+                    allergenToIngredient[allergens.first()] = ingredients.first()
+                    newFound += 1
+                }
+            }
+
+            // compare rows against each other
+            allergensToIngredients.forEachIndexed { index1, (allergens1, ingredients1) ->
+                allergensToIngredients.forEachIndexed { index2, (allergens2, ingredients2) ->
+                    if (index2 > index1) {
+                        val commonAllergens = allergens1.intersect(allergens2)
+                        val commonIngredients = ingredients1.intersect(ingredients2)
+                        if (commonAllergens.size == 1 && commonIngredients.size == 1) {
+                            allergenToIngredient[commonAllergens.first()] = commonIngredients.first()
+                            newFound += 1
+                        }
                     }
                 }
-                val keysWithEmptyValues = allergensToPotentialIngredients.filterValues { it.isEmpty() }.keys
-                keysWithEmptyValues.forEach {
-                    allergensToPotentialIngredients.remove(it)
-                }
             }
 
-            allergensWithOneIngredient = allergensToPotentialIngredients.filterValues { it.size == 1 }
-        }
+            val newAllergensToIngredients = mutableListOf<Pair<Set<String>, Set<String>>>()
+            allergensToIngredients.forEach { (allergens, ingredients) ->
+                val unknownAllergens = allergens - allergenToIngredient.keys
+                if (unknownAllergens.isNotEmpty()) {
+                    newAllergensToIngredients.add(Pair(unknownAllergens, ingredients - allergenToIngredient.values))
+                }
+            }
+            allergensToIngredients = newAllergensToIngredients
 
-//        val allIngredientsWithAllergens = allergensToIngredients.values.flatten().toSet()
-//        println("All ingredients: $allIngredients")
-        println("ingredientsToPotentialAllergens: $ingredientsToPotentialAllergens")
-        println("allergensToPotentialIngredients: $allergensToPotentialIngredients")
-        println("ingredientsToAllergens: $allSingleAllergensToIngredients")
+        } while (newFound > 0)
 
-        return (allIngredients - allSingleAllergensToIngredients.keys).size.toLong()
-
+        val remainingIngredients = startAllergensToIngredients.map { it.second }.flatten() - allergenToIngredient.values
+        return remainingIngredients.size.toLong()
     }
 
     override fun part2(input: List<String>): Long {
         return 0L
     }
 
-    fun parseIngredientsAndAllergens(line: String): Pair<Set<String>, Set<String>> {
+    private fun parseIngredientsAndAllergens(line: String): Pair<Set<String>, Set<String>> {
         val lineRegex = Regex("^(.+) \\(contains (.+)\\)")
         val match = lineRegex.find(line)!!
         val (ingredients, allergens) = match.destructured
